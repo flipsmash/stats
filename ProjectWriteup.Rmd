@@ -1,0 +1,68 @@
+---
+title: "Sampling Means Drawn from the Exponential Distribution"
+author: "Brian Finnegan"
+date: "August 10, 2015"
+output: 
+  pdf_document: 
+    fig_height: 3
+    fig_width: 4
+---
+#Overview
+The following reports on a simulation whereby repeated samples of means (n=40) drawn from the exponential distribtuion are shown to be approximately normal.
+
+#Simulations
+The probabilty density function of an exponential distribution is 
+$$f(x, \lambda) = \lambda e^{-\lambda x}$$
+for x ≥ 0, 0 for x < 0.
+
+First, we draw 1,000 random observations from the exponential distribution with lambda = 0.2:
+```{r}
+set.seed(1)
+lambda = .2
+exp <- (rexp(1000, lambda))
+```
+
+While exp here is actually a sample from the exponential distribution, as opposed to the actual distribution itself, it is a very large sample, and visually we can see it approximates the distribution closely:
+
+```{r echo=TRUE}
+## Draw the histogram of the random sample from the exponential distribution
+hist(exp, breaks=20, freq=F)
+abline(mean(exp), col="blue")
+## Draw the actual distribution over the random sample
+i = seq(0,40)
+lines(i,dexp(i,lambda))
+
+```
+
+Next, we generate 1,000 instances of the mean of 40 random, iid exponentials for analysis of their means and variances relative of those of the underlying distribution (or more accurately the approximation thereof:
+```{r }
+set.seed(1)
+mns = NULL
+for(i in 1:1000) mns = c(mns, mean(rexp(40, lambda)))
+```
+
+#Sample Mean versus Theoretical Mean
+The theoretical mean of an exponential distribution with lambda = .2 is 1/.2 or 5.  The mean of the approximation of the distribution is close:
+```{r echo=TRUE}
+mean(exp)
+```
+Turning to the 1,000 samples of the mean of 40 exponentials, we see the smallest mean was 3.1, the largest 7.5 and the mean of the means, at 4.99 and represented in the histogram by the blue line, was very close to the theoretcial value of 5:
+```{r echo=TRUE}
+
+hist(mns)
+abline(v = mean(mns), col="blue")
+```
+
+This is because the sample mean is an unbiased estimator of the population mean.
+
+#Sample Variance versus Theoretical Variance
+
+#Distribution
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
