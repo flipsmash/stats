@@ -1,58 +1,63 @@
 ---
-title: "Sampling Means Drawn from the Exponential Distribution"
+title: "Sample Means Drawn from the Exponential Distribution"
 author: "Brian Finnegan"
 date: "August 10, 2015"
 output: 
   pdf_document: 
-    fig_height: 3
-    fig_width: 4
+    fig_height: 3.5
+    fig_width: 4.5
 ---
 #Overview
 The following reports on a simulation whereby repeated samples of means (n=40) drawn from the exponential distribtuion are shown to be approximately normal.
 
 #Simulations
-The probabilty density function of an exponential distribution is 
-$$f(x, \lambda) = \lambda e^{-\lambda x}$$
-for x ≥ 0, 0 for x < 0.
-
 First, we draw 1,000 random observations from the exponential distribution with lambda = 0.2:
 ```{r}
+## set seed to allow exact reproducability
 set.seed(1)
 lambda = .2
 exp <- (rexp(1000, lambda))
 ```
 
-While exp here is actually a sample from the exponential distribution, as opposed to the actual distribution itself, it is a very large sample, and visually we can see it approximates the distribution closely:
+While exp here is actually a sample from the exponential distribution, as opposed to the actual distribution itself, it is a large sample, and visually we can see it approximates the distribution closely:
 
-```{r echo=TRUE}
+```{r echo=F}
 ## Draw the histogram of the random sample from the exponential distribution
 hist(exp, breaks=20, freq=F)
 ## Draw the actual distribution over the random sample
 i = seq(0,40)
 lines(i,dexp(i,lambda))
-abline(v = mean(exp), col = "blue")
+abline(v = mean(exp), col = "blue" )
+text(13, 0.1, "mean = 5.13", col = "blue")
 
 ```
 
-Next, we generate 1,000 instances of the mean of 40 random, iid exponentials for analysis of their means and variances relative of those of the underlying distribution (or more accurately the approximation thereof:
-```{r }
+Next, we generate 1,000 instances of the mean of 40 random, iid variables drawn from the exponential distribution with lambda = 0.2 for analysis of their means and variances relative of those of the underlying distribution (or more accurately the approximation thereof):
+
+```{r echo=TRUE}
 set.seed(1)
 mns = NULL
 for(i in 1:1000) mns = c(mns, mean(rexp(40, lambda)))
 ```
 
 #Sample Mean versus Theoretical Mean
-The theoretical mean of an exponential distribution with lambda = .2 is 1/.2 or 5.  The mean of the approximation of the distribution, indicated by the blue line in the histogram above, is quite close to five.
+The theoretical mean of an exponential distribution with lambda = .2 is 1/.2 or 5.  The mean of the approximation of the distribution, indicated by the blue line in the histogram above, is quite close to that at 5.13.
 
-Turning to the 1,000 samples of the mean of 40 exponentials, we see the smallest mean was 3.1, the largest 7.5 and the mean of the means, at 4.99 and represented in the histogram by the blue line, was very close to the theoretcial value of 5:
-```{r echo=TRUE}
-
-hist(mns, freq = f)
+Turning to the 1,000 samples of the mean of 40 exponentials, we see the smallest mean was 3.1, the largest 7.5 and the mean of the means, at 4.99 and represented in the histogram by the blue line, was very close to the theoretical value of 5:
+```{r echo=FALSE}
+set.seed(1)
+mns = NULL
+for(i in 1:1000) mns = c(mns, mean(rexp(40, lambda)))
+hist(mns, freq = F)
 abline(v = mean(mns), col="blue")
+i <- seq(0,8,.1)
+n <- dnorm(i, mean(mns), sd(mns))
+lines(i, n, col = "green")
 ```
 
-This is because the sample mean is an unbiased estimator of the population mean.  While the mean of the samples' means is similar to that of the population, the distribution of those means is quite different from that of the underlying distribution.  
+This is because the sample mean is an unbiased estimator of the population mean.  
 
 #Sample Variance versus Theoretical Variance
-
+The theoretical standard deviation of the exponential distribution is given by 1/lambda, same as its mean.  Here, with a lamba of 0.2, the standard deviation is 5 and variance is 25.  The variance of the sample mean is known to be the population variance divided by the sample size, which in this case is 25/40 or 0.625. Normally one is not able to check this result empirically because we only can take one sample, but in this case we took 1,000, and can check the result.  And the actual variance of the 1,000 samples is 0.611 The fact that the variance of the samples' means is much smaller than that of the individual observations in the underlying distribution is expected given that the mean of a sample of 40 observations taken from the population will group much more closely to the population mean than the individual observations of the underlying population do.     
 #Distribution
+While the mean of the samples' means is almost identical to that of the population, we can see by comparing figure two with figure one above that the distribution of those means is quite different from that of the underlying population.  While the exponential distribution's mode (the point at which its pdf is tallest) is at the leftmost extreme of the distribution, the distribution of the 40-observation samples is symmetrical about the mean.  Overlaying the actual normal distribution overtop of the histogram of the sample means' density shows that the distribution approximates the normal distribution closely.  This is to be expected per the central limit theorem, which states that the distribution of the mean of a sufficiently large IID sample of an underlying distribution (and with an n of 40, ours is a fairly large sample for these purposes) will be approximately normally distributed, irrespective of the underlying distribution of the population itself (provided the population has a finite standard deviation).  This result may be particularly surprising result with the exponential distribution, given that its pdf shape is so completely different than that of the bell-shaped normal distribution.  The importance of the central limit theorem is difficult to overstate; indeed, it is the reason that the statistical inference we have learned in this class is able to work as it does.
