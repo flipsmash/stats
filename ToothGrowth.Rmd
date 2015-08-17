@@ -1,0 +1,55 @@
+---
+title: "Tooth Growth"
+author: "Brian Finnegan"
+date: "August 15, 2015"
+output: pdf_document
+---
+
+#Basic Data Summary
+The "describe" function from the "pysch" package provides a good descriptive summary of the variables in the ToothGrowth data frame:
+```{r}
+library("psych")
+describe(ToothGrowth)
+```
+However, most of the interesting questions one might have about these data require examination in groups aggregated per factor, which will be the focus of the exploratory analysis that follows.
+
+#Exploratory Data Analysis
+My chief questions for inital exploratory analysis would be 1) Does length vary according to the Vitamin C dose administered, and does it vary by delivery mechanism?  The following reveals some indication of the answer to these and sets the stage for formal inference:
+```{r}
+tg <- ToothGrowth
+attach(tg)
+aggregate(len~dose, FUN=mean)
+aggregate(len~supp, FUN=mean)
+aggregate(len~supp*dose, FUN=mean)
+boxplot(len~supp*dose, data=tg, col=c("orange", "yellow"), main="Tooth Growth by Supplement and Dose")
+```
+
+#Hypothesis Testing
+Let's formalize the sense developed during exploratory analysis that growth among dosage levels is not the same, starting by comparing the widest differences in dosage, 0.5 to 2:
+```{r}
+tgs <-split(tg, dose)
+ t.test(tgs$`0.5`$len, tgs$`2`$len)
+```
+Given that the resulting p-value is well below our desired alpha of .01, there is evidence enough to reject the null hypothesis that the means are equal at the .01 level.   As such, it makes sense to compare dose levels 0.5 to 1 and 1 to 2 respectively:
+```{r}
+tgs <-split(tg, dose)
+ t.test(tgs$`0.5`$len, tgs$`1`$len)
+ t.test(tgs$`1`$len, tgs$`2`$len)
+```
+Again, given a desired alpha of .01 and a resultant p-value in both cases well below that, we have evidence enough to reject the null hypotheses that mean length for dose 0.5 is equal to that of dose 1.0 and that that of 1.0 is equal to that of 2.0 at our chosen confidence level.
+
+Next it makes sense to see if there is evidence the mean lengths for the supplement types are different:
+```{r}
+ t.test(len~supp, data=tg)
+```
+Here one fails to reject at the .01 confidence level the null hypothesis that the means are equal because the p-value of .06 is larger than our chosen confidence of .01, indicating a difference between the means that is inadequate given the groups' respective variances for one to be sufficently confident they are from populations with different means.
+
+## Assumptions Needed for the Conclusions Above
+For the conclusions detailed above to be accurate, resulting as they do from T-tests, the following assumptions must hold:
+
+1.  The samples must be independent(results from one participant cannot be related to scores of other participants)
+2.  The length variable must be normally distributed within the underlying populations
+3.  _Note that one does NOT need to assume equal variances with R's t.test() function_
+
+##Limitations
+Using hypothesis testing and/or confidence intervals, it is impractical to account for levels of both varaibles of interest (dose and delivery method) at the same time.  Further, dealing with the fact that one of the independent variables (dose) has three levels is not easy.  Analysis of variance (ANOVA) would have afforded a ready way to deal with more than two dosing levels and Two-way ANOVA an easier way to examine two independent variables at once (plus the capacity to investigate one factor's interaction with the other). Perhaps another day. 
